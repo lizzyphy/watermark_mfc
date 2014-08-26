@@ -64,7 +64,7 @@ BOOL CtestDlg::OnInitDialog()
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
-
+	((CEdit *)GetDlgItem(IDC_EDIT_WM))->SetLimitText(6);
 	// TODO: 在此添加额外的初始化代码
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -108,13 +108,13 @@ HCURSOR CtestDlg::OnQueryDragIcon()
 
 
 
-void CtestDlg::OnBnClickedButtonGenerateAuto()
+void CtestDlg::OnBnClickedButtonGenerateAuto()//生成水印--完成
 {
 	// 自动生成水印按钮
 	bool flag = false;
-	
-	flag = GenerateAuto(m_Watermark);
-
+	UpdateData(true);
+	flag = GenerateAuto(m_Watermark,m_Watermark_en);
+	AfxMessageBox(m_Watermark_en);
 	if (flag == false)
 	{
 		AfxMessageBox(_T("水印不合法！"));
@@ -267,13 +267,24 @@ void CtestDlg::OnBnClickedCancel()
 	CDialogEx::OnCancel();
 }
 
-bool CtestDlg::GenerateAuto( CString& str)
+bool CtestDlg::GenerateAuto( CString input,CString& output)//汉字编码
 {
-	// TODO: 自动生成水印程序
-	str = _T("haha"); // 测试语句
-	
+	char buf[13] = {0};
+	memcpy(buf,input.GetBuffer(0),input.GetLength()*2);
+	output =  _T("");
+	CString temp = _T("");
+	for(int offset = 0;offset < 12;offset += 2)
+	{
+		temp.Format(_T("%02X"),(unsigned char)buf[offset + 1]);
+		output += temp;
+		temp.Format(_T("%02X"),(unsigned char)buf[offset]);
+		output += temp;
+	}
+
+	// TODO: 自动生成水印程序	
+
 	// 判断水印是否合法
-	if (!WatermarkCheck( str ))
+	if (!WatermarkCheck(output))
 	{
 		AfxMessageBox(_T("水印生成有误！"));
 		return false;
@@ -373,4 +384,22 @@ bool CtestDlg::IfNeedChangeFormat(CString src_path)
 	{
 		return true;//需要准换格式
 	}
+}
+void CtestDlg::Reverse(CString output)//解码部分
+{
+	int nCount = 1;
+	wchar_t* buff = new wchar_t[nCount+1];
+	memset(buff, 0, sizeof(wchar_t)*(nCount+1));
+	int nIndex = 0;
+
+	TCHAR seps[] = _T(" ");
+	TCHAR* token = _tcstok(output.GetBuffer(output.GetLength()), seps);
+	while(NULL != token)
+	{
+		buff[nIndex++] = _tcstoul(token, NULL, 16);
+		token = _tcstok(NULL, seps);
+	}
+	AfxMessageBox(CString(buff));
+	delete[] buff;
+	buff = NULL;
 }

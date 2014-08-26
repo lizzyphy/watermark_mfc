@@ -36,6 +36,7 @@ public:
 	afx_msg void OnBnClickedCancel(); // 中止或退出按钮
 	afx_msg void OnBnClickedButtonSave();
 	CString m_Watermark; // 水印
+	CString m_Watermark_en;//水印编码
 	CString m_Src; // 原始视频路径
 	CString m_Screen; // 进程显示
 	CString m_SavePath; // 保存路径
@@ -43,10 +44,11 @@ public:
 	CProgressCtrl m_Progress; // 进度条
 	CFormat Format;
 private:
-	bool GenerateAuto(CString&); // 水印自动生成函数
+	bool GenerateAuto(CString,CString&); // 水印自动生成函数
 	bool WatermarkCheck(CString); // 水印合法检测函数
 	bool JudgeFormat(CString); // 判断输入视频格式是否正确
 	bool StorageSpace(CString);//判断视频保存路径所在磁盘空间是否够大
 	bool IfNeedChangeFormat(CString);//判断输入视频格式是否需要转换
+	void Reverse(CString);
 };
  

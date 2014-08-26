@@ -332,35 +332,17 @@ bool CtestDlg::JudgeFormat(CString path)
 		return false;
 	}
 }
-bool CtestDlg::StorageSpace(CString storage_path)
+bool CtestDlg::StorageSpace(CString path)
 {
-	int p;
-	float ResidualSpace;
-	CString Root_path;
-	p = storage_path.ReverseFind(':');
-	Root_path = storage_path.Mid(1,p);
-	bool fResult;
-	unsigned _int64   lpFreeBytesAvailableToCaller;
-	unsigned _int64   lpTotalNumberOfBytes;
-	unsigned _int64   lpTotalNumberOfFreeBytes;
-	fResult=::GetDiskFreeSpaceEx(Root_path,(PULARGE_INTEGER)&lpFreeBytesAvailableToCaller,(PULARGE_INTEGER)&lpTotalNumberOfBytes, (PULARGE_INTEGER)&lpTotalNumberOfFreeBytes);
-	if(fResult)
+	int ipos = path.ReverseFind('\\');
+	path = path.Left(ipos);//存储路径去除文件名
+	ULARGE_INTEGER uliUserFree,uliTotal,uliRealFree;
+	GetDiskFreeSpaceEx(path,&uliUserFree,&uliTotal,&uliRealFree);//获取剩余存储空间
+	if(uliRealFree.QuadPart/(1024*1024*1024) < 2)
 	{
-		ResidualSpace = (float)lpFreeBytesAvailableToCaller/1024/1024;
-		if(ResidualSpace>=2000)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-
+		return 0;
 	}
-	else
-	{
-		return false;
-	}
+	return 1;
 }
 bool CtestDlg::IfNeedChangeFormat(CString src_path)
 {

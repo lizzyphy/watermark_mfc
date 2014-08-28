@@ -191,10 +191,10 @@ void CtestDlg::OnBnClickedOk()
 		AfxMessageBox(_T("视频保存路径所在磁盘空间小于2G"));
 	}
 	// TODO：判断视频保存路径是否存在，没有则新建一个
-	if(!PathIsDirectory(m_SavePath))
-	{
-		CreateDirectory(m_SavePath,NULL) ;//不存在就在目标路径上创建一个文件夹
-	}
+	//if(!PathIsDirectory(m_SavePath))
+	//{
+	//	CreateDirectory(m_SavePath,NULL) ;//不存在就在目标路径上创建一个文件夹
+	//}
 	
 	// TODO：执行嵌入，若不成功则删除残留文件
 
@@ -214,7 +214,7 @@ void CtestDlg::OnBnClickedOk()
 	UpdateData(false);
 	if(IfNeedChangeFormat(m_Src))//判断是否需要准换格式
 	{
-		if (!Format.Video2YUV())
+		if (!Format.Video2YUV(m_Src,m_SavePath))
 		{
 			AfxMessageBox(_T("Video2YUV出错！"));
 			m_Screen += _T("程序正在回滚…\r\n");
@@ -364,7 +364,7 @@ bool CtestDlg::IfNeedChangeFormat(CString src_path)
 	}
 	else
 	{
-		return true;//需要准换格式
+		return true;//需要转换格式
 	}
 }
 void CtestDlg::Reverse(CString output)//解码部分

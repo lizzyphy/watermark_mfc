@@ -5,9 +5,9 @@
 #include "stdafx.h"
 #include "test.h"
 #include "testDlg.h"
-#include "afxdialogex.h"
+#include "afxdlgs.h"
 #include <shlwapi.h>
-#pragma comment(lib,"Shlwapi.lib")
+#pragma comment(lib,"shlwapi.lib")
 #include <windows.h>  
 using namespace std; 
 
@@ -142,7 +142,7 @@ void CtestDlg::OnBnClickedButtonScan()
 void CtestDlg::OnBnClickedButtonSave()
 {
 	// 设置保存生成视频路径
-	CFileDialog pCFileDialog(false,m_Ext,NULL,0,_T("(*.yuv)|*.yuv|(*.mpg)|*.mpg|(*.vob)|*.vob|(*.m2v)|*.m2v||"));
+	CFileDialog pCFileDialog(false,m_Ext,NULL,0,_T("(*.yuv)|*.yuv|(*.mpg)|*.mpg|(*.vob)|*.vob|(*.m2v)|*.m2v||"),NULL);
 	if(pCFileDialog.DoModal()!=IDOK) 
 	{ 
 		return; 
@@ -191,9 +191,12 @@ void CtestDlg::OnBnClickedOk()
 		AfxMessageBox(_T("视频保存路径所在磁盘空间小于2G"));
 	}
 	// TODO：判断视频保存路径是否存在，没有则新建一个
-	if(!PathIsDirectory(m_SavePath))
+	int ipos = m_SavePath.ReverseFind('\\');
+	m_SavePath = m_SavePath.Left(ipos);//存储路径去除文件名
+	//AfxMessageBox(m_SavePath);
+	if(!DirectoryExist(m_SavePath))
 	{
-		CreateDirectory(m_SavePath,NULL) ;//不存在就在目标路径上创建一个文件夹
+		CreateDirectory(m_SavePath) ;//不存在就在目标路径上创建一个文件夹
 	}
 	
 	// TODO：执行嵌入，若不成功则删除残留文件
@@ -384,4 +387,28 @@ void CtestDlg::Reverse(CString output)//解码部分
 	AfxMessageBox(CString(buff));
 	delete[] buff;
 	buff = NULL;
+}
+
+bool CtestDlg::DirectoryExist(CString Path)
+{
+	WIN32_FIND_DATA fd;
+	BOOL ret = FALSE;
+	HANDLE hFind = FindFirstFile(Path, &fd);
+	if ((hFind != INVALID_HANDLE_VALUE) && (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+	{
+		//目录存在
+		ret = TRUE;
+
+	}
+	FindClose(hFind);
+	return ret;
+}
+bool CtestDlg::CreateDirectory(CString path)
+{
+	SECURITY_ATTRIBUTES attrib;
+	attrib.bInheritHandle = FALSE;
+	attrib.lpSecurityDescriptor = NULL;
+	attrib.nLength = sizeof(SECURITY_ATTRIBUTES);
+
+	return ::CreateDirectory( path, &attrib);
 }

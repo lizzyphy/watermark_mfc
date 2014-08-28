@@ -13,7 +13,7 @@ public:
 	CString m_DirYUV; // YUV¡Ÿ ±±£¥Ê¬∑æ∂
 	bool AudioSeparation();
 	bool AudioCombine();
-	bool Video2YUV();
+	bool Video2YUV(CString,CString);
 	bool YUV2Video();
 	bool Embed();
 	bool DelectAll();

@@ -39,8 +39,10 @@
 
 
 #include <afxsock.h>            // MFC Ì×½Ó×ÖÀ©Õ¹
-
-
+#include <Windows.h>
+#include <string>
+#include <fstream>
+#include <Winbase.h>
 
 
 

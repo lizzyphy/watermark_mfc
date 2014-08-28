@@ -217,7 +217,7 @@ void CtestDlg::OnBnClickedOk()
 	UpdateData(false);
 	if(IfNeedChangeFormat(m_Src))//判断是否需要准换格式
 	{
-		if (!Format.Video2YUV())
+		if (!Format.Video2YUV(m_Src,m_SavePath))
 		{
 			AfxMessageBox(_T("Video2YUV出错！"));
 			m_Screen += _T("程序正在回滚…\r\n");
@@ -367,7 +367,7 @@ bool CtestDlg::IfNeedChangeFormat(CString src_path)
 	}
 	else
 	{
-		return true;//需要准换格式
+		return true;//需要转换格式
 	}
 }
 void CtestDlg::Reverse(CString output)//解码部分

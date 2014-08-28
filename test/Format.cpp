@@ -34,21 +34,16 @@ bool CFormat::AudioCombine()
 	return true;
 }
 
-bool CFormat::Video2YUV()
-{
-	CString mm;
-	mm.Format(_T("ffmpeg.exe -s 720x576 -i %s -s 720x576  2.yuv"), m_Src);
-	int tt = WinExec((LPCSTR)mm.GetBuffer(),5);
-	if   (tt <32) 
-	{
-		AfxMessageBox(_T("×ª»»ÊÓÆµ³ö´í£¡"));
-		return false;
-	}	
-	else
-	{
-		return true;
-	}
-
+bool CFormat::Video2YUV(CString src_path,CString save_path)
+{ 
+	CString command_bat;
+	command_bat = _T("ffmpeg.exe -s 720x576 -i ") + src_path + _T(" -s 720x576 ")+save_path+_T("\r\n");
+	CStdioFile file;
+	file.Open(_T("RUN.bat"),CFile::modeWrite);
+	file.WriteString(command_bat);
+	file.Close();
+	WinExec("RUN.bat",SW_SHOW); 
+	return true;
 	
 }
 

@@ -49,6 +49,8 @@ private:
 	bool JudgeFormat(CString); // 判断输入视频格式是否正确
 	bool StorageSpace(CString);//判断视频保存路径所在磁盘空间是否够大
 	bool IfNeedChangeFormat(CString);//判断输入视频格式是否需要转换
+	bool DirectoryExist(CString);//判断路径是否存在
+	bool CreateDirectory(CString);//创建路径
 	void Reverse(CString);
 };
  

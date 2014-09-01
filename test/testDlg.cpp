@@ -192,11 +192,11 @@ void CtestDlg::OnBnClickedOk()
 	}
 	// TODO：判断视频保存路径是否存在，没有则新建一个
 	int ipos = m_SavePath.ReverseFind('\\');
-	m_SavePath = m_SavePath.Left(ipos);//存储路径去除文件名
+	CString m_Path = m_SavePath.Left(ipos);//存储路径去除文件名
 	//AfxMessageBox(m_SavePath);
-	if(!DirectoryExist(m_SavePath))
+	if(!DirectoryExist(m_Path))
 	{
-		CreateDirectory(m_SavePath) ;//不存在就在目标路径上创建一个文件夹
+		CreateDirectory(m_Path) ;//不存在就在目标路径上创建一个文件夹
 	}
 	
 	// TODO：执行嵌入，若不成功则删除残留文件

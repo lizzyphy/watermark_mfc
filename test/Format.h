@@ -11,11 +11,29 @@ public:
 	CString m_DirAudio; // 音频临时保存路径
 	CString m_DirVideo; // 视频临时保存路径
 	CString m_DirYUV; // YUV临时保存路径
+
+	//子函数声明
+	void CreatWatermark();						//生成水印数据：0 and 1
+	void WatermarkEmbed();	            	//水印嵌入过程
+
+	void WaveletTrans2D_1();					//第一层二维小波变换
+	void WaveletTrans2D_2();					//第二层二维小波变换
+	void WaveletTrans2D_3();					//第三层二维小波变换
+	void WaveletTransI2D_1();					//第一层二维小波逆变换
+	void WaveletTransI2D_2();					//第二层二维小波逆变换
+
+	void SearchPoint();							//查找特征点位置
+
+	void ChangePoint(char*);							//修改特征点值
+	double SetValue(short, short, short,short);	//具体给特征点赋值
+	double ModMin(short,short);					//特殊情况时，修改特征点周围的值
+	short GetSign(double);						//取数据的符号
+
 	bool AudioSeparation();
 	bool AudioCombine();
 	bool Video2YUV(CString,CString);
 	bool YUV2Video();
-	bool Embed();
+	bool Embed(char*,char*,char*);
 	bool DelectAll();
 	bool MySystem(const CString&, const CString&, int );//调用新的进程，完成视频格式转换
 };

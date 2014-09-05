@@ -106,8 +106,6 @@ HCURSOR CtestDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
 void CtestDlg::OnBnClickedButtonGenerateAuto()//生成水印--完成
 {
 	// 自动生成水印按钮
@@ -123,7 +121,6 @@ void CtestDlg::OnBnClickedButtonGenerateAuto()//生成水印--完成
 
 	UpdateData(false);
 }
-
 
 void CtestDlg::OnBnClickedButtonScan()
 {
@@ -215,7 +212,7 @@ void CtestDlg::OnBnClickedOk()
 
 	m_Screen += _T("执行视频格式转换…\r\n");
 	UpdateData(false);
-	if(IfNeedChangeFormat(m_Src))//判断是否需要准换格式
+	if(IfNeedChangeFormat(m_Src))//判断是否需要转换格式
 	{
 		if (!Format.Video2YUV(m_Src,m_SavePath))
 		{
@@ -228,7 +225,16 @@ void CtestDlg::OnBnClickedOk()
 
 	m_Screen += _T("执行嵌入…\r\n");
 	UpdateData(false);
-	if (!Format.Embed())
+	//将水印从16进制转为2进制
+	CString watermark_en2;
+	CS16toCS2(m_Watermark_en,watermark_en2);
+	char* watermark = CStochar(watermark_en2);
+	//将水印从CString转为char
+
+	//将打开、保存地址从CString转为char
+	char* srcpath = CStochar(m_Src);
+	char* savepath = CStochar(m_SavePath);
+	if (!Format.Embed(watermark,srcpath,savepath))
 	{
 		AfxMessageBox(_T("Embed出错！"));
 		m_Screen += _T("程序正在回滚…\r\n");
@@ -284,8 +290,6 @@ bool CtestDlg::GenerateAuto( CString input,CString& output)//汉字编码
 		output += temp;
 	}
 
-	// TODO: 自动生成水印程序	
-
 	// 判断水印是否合法
 	if (!WatermarkCheck(output))
 	{
@@ -302,6 +306,7 @@ bool CtestDlg::WatermarkCheck( CString )
 
 	return true;
 }
+
 bool CtestDlg::JudgeFormat(CString path)
 {
 	int p, p1, p2 ,p3, p4;
@@ -335,6 +340,7 @@ bool CtestDlg::JudgeFormat(CString path)
 		return false;
 	}
 }
+
 bool CtestDlg::StorageSpace(CString path)
 {
 	int ipos = path.ReverseFind('\\');
@@ -347,6 +353,7 @@ bool CtestDlg::StorageSpace(CString path)
 	}
 	return 1;
 }
+
 bool CtestDlg::IfNeedChangeFormat(CString src_path)
 {
 	int p;
@@ -370,6 +377,7 @@ bool CtestDlg::IfNeedChangeFormat(CString src_path)
 		return true;//需要转换格式
 	}
 }
+
 void CtestDlg::Reverse(CString output)//解码部分
 {
 	int nCount = 1;
@@ -403,6 +411,7 @@ bool CtestDlg::DirectoryExist(CString Path)
 	FindClose(hFind);
 	return ret;
 }
+
 bool CtestDlg::CreateDirectory(CString path)
 {
 	SECURITY_ATTRIBUTES attrib;
@@ -411,4 +420,44 @@ bool CtestDlg::CreateDirectory(CString path)
 	attrib.nLength = sizeof(SECURITY_ATTRIBUTES);
 
 	return ::CreateDirectory( path, &attrib);
+}
+
+char* CtestDlg::CStochar(CString str)
+{
+	int len =WideCharToMultiByte(CP_ACP,0,str,str.GetLength(),NULL,0,NULL,NULL);
+	//为多字节字符数组申请空间，数组大小为按字节计算的宽字节字节大小
+	char * p = new char[len+1];  //以字节为单位
+	//宽字节编码转换成多字节编码
+	WideCharToMultiByte(CP_ACP,0,str,str.GetLength(),p,len,NULL,NULL);
+	p[len] = '\0';   //多字节字符以'\0'结束
+	return p;
+}
+
+void CtestDlg::CS16toCS2(CString str,CString& restr)
+{
+	int len = str.GetLength();
+	restr = _T("");
+	for(int i = 0; i < len; i ++)
+	{
+		switch (str[i]){
+			case '0':restr = restr + _T("0000"); break;
+			case '1':restr = restr + _T("0001"); break; 
+			case '2':restr = restr + _T("0010"); break;
+			case '3':restr = restr + _T("0011"); break;
+			case '4':restr = restr + _T("0100"); break;
+			case '5':restr = restr + _T("0101"); break;
+			case '6':restr = restr + _T("0110"); break;
+			case '7':restr = restr + _T("0111"); break;
+			case '8':restr = restr + _T("1000"); break;
+			case '9':restr = restr + _T("1001"); break;
+			case 'A':restr = restr + _T("1010"); break;
+			case 'B':restr = restr + _T("1011"); break;
+			case 'C':restr = restr + _T("1100"); break;
+			case 'D':restr = restr + _T("1101"); break;
+			case 'E':restr = restr + _T("1110"); break;
+			case 'F':restr = restr + _T("1111"); break;
+			default:restr = restr + _T("0000"); break;
+		}
+		
+	}
 }

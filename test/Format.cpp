@@ -3,9 +3,7 @@
 #include <windows.h >
 #include "test.h"
 #include "testDlg.h"
-//原始YUV文件路径及存储嵌入水印后的路径
-//char srcpath[43] = "C:/Users/Administrator/Desktop/video/1.yuv";//原始视频路径
-//char savepath[46] = "C:/Users/Administrator/Desktop/video/test.yuv";//生成视频路径
+
 double Nmean;				//存储修改第一个值时，可能对均值造成影响
 
 //存储从源文件中读取的Y,U,V分量，只保留当前处理帧
@@ -34,10 +32,9 @@ double TCV2[MHEIGHT/4][MWIDTH/4];
 double TCD2[MHEIGHT/4][MWIDTH/4];
 //leve3
 double TCA3[MHEIGHT/8][MWIDTH/8];
-
 //存储水印嵌入点位置
 short WMPoint[WMLENGTH];
-
+unsigned char watermark[WMLENGTH] = {0};				//存储生成的原始水印
 CFormat::CFormat(void)
 {
 	m_Src = _T("");
@@ -67,9 +64,11 @@ bool CFormat::AudioCombine()
 	return true;
 }
 
-bool CFormat::Video2YUV(CString src_path,CString save_path) //视频转换格式
+bool CFormat::Video2YUV(CString src_path) //视频转换格式
 { 
 	CString command_bat;
+	CString save_path;
+	save_path = _T("water315.yuv");
 	command_bat = _T("ffmpeg.exe -s 720x576 -i ") + src_path + _T(" -s 720x576 ")+save_path+_T("\r\n");
 	CStdioFile file;
 	file.Open(_T("RUN.bat"),CFile::modeWrite);
@@ -85,21 +84,20 @@ bool CFormat::YUV2Video()
 	return true;
 }
 
-bool CFormat::Embed(char* watermark,char* srcpath,char* savepath)
+bool CFormat::Embed(char* srcpath,char* savepath)
 {
+	FILE *op;
+	op = fopen("watermark.dat","rb");
+	fread(watermark, 1, WMLENGTH, op);
+	fclose(op);
 	FILE *fp;
 	__int64 offset;				//偏移计算使用long long型，方便访问大于2G的文件
 	int num;
 	int i,j;
 	double CalValue, CalFloor;				//为了将实数取整的中间变量
 	char combel[100] = "del ";
-	
 	for (num = 0; num < FRAMES; num++)
 	{
-		if (num%100 == 99)
-		{
-			printf("%6d00 have been done!\n",num/100+1);
-		}
 		//读一帧YUV视频
 		if (fp = fopen(srcpath,"rb"))
 		{
@@ -131,7 +129,7 @@ bool CFormat::Embed(char* watermark,char* srcpath,char* savepath)
 		//找特征点
 		SearchPoint();
 		//修改值，嵌入水印
-		ChangePoint(watermark);
+		ChangePoint();
 		
 		//Inverse Wavelet Transform
 		WaveletTransI2D_2();
@@ -182,7 +180,7 @@ bool CFormat::Embed(char* watermark,char* srcpath,char* savepath)
 	return true;
 }
 
-void  CFormat::ChangePoint(char* watermark)
+void  CFormat::ChangePoint()
 {
 	short k;
 	short Nrow, Ncolumn;

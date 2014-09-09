@@ -54,5 +54,6 @@ private:
 	void Reverse(CString);
 	char* CStochar(CString);
 	void CS16toCS2(CString,CString&);
+	bool Finallydel();
 };
  

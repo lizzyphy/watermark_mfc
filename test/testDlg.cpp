@@ -214,7 +214,7 @@ void CtestDlg::OnBnClickedOk()
 	UpdateData(false);
 	if(IfNeedChangeFormat(m_Src))//判断是否需要转换格式
 	{
-		if (!Format.Video2YUV(m_Src,m_SavePath))
+		if (!Format.Video2YUV(m_Src))
 		{
 			AfxMessageBox(_T("Video2YUV出错！"));
 			m_Screen += _T("程序正在回滚…\r\n");
@@ -229,12 +229,20 @@ void CtestDlg::OnBnClickedOk()
 	CString watermark_en2;
 	CS16toCS2(m_Watermark_en,watermark_en2);
 	char* watermark = CStochar(watermark_en2);
+	for(int j=0;j<96;j++)
+	{
+		watermark[j] = watermark[j]-48;
+	}
 	//将水印从CString转为char
+	FILE *fp;
+	fp = fopen("watermark.dat","wb");
+	fwrite(watermark, 4, 96, fp);
+	fclose(fp);
 
 	//将打开、保存地址从CString转为char
 	char* srcpath = CStochar(m_Src);
 	char* savepath = CStochar(m_SavePath);
-	if (!Format.Embed(watermark,srcpath,savepath))
+	if (!Format.Embed(srcpath,savepath))
 	{
 		AfxMessageBox(_T("Embed出错！"));
 		m_Screen += _T("程序正在回滚…\r\n");
@@ -265,6 +273,10 @@ void CtestDlg::OnBnClickedOk()
 	// TODO：判断是否执行成功，若不成功则返回错误信息
 
 	m_Screen += _T("大功告成！\r\n");
+	if(!Finallydel())
+	{
+		AfxMessageBox(_T("删除文件出错"));
+	}
 	UpdateData(false);
 	//CDialogEx::OnOK();
 }
@@ -325,14 +337,12 @@ bool CtestDlg::JudgeFormat(CString path)
 	m_Src_suffix = path.Mid(p);
 	CString strp;
 	strp.Format(_T("%d"),p);
-	AfxMessageBox(m_Src_suffix);
 	p1 = m_Src_format1.CompareNoCase(m_Src_suffix);
 	p2 = m_Src_format2.CompareNoCase(m_Src_suffix);
 	p3 = m_Src_format3.CompareNoCase(m_Src_suffix);
 	p4 = m_Src_format4.CompareNoCase(m_Src_suffix);
 	if((p1==0) || (p2==0) || (p3==0) || (p4==0))
 	{
-		AfxMessageBox(_T("fight"));
 		return true;
 	}
 	else
@@ -366,7 +376,6 @@ bool CtestDlg::IfNeedChangeFormat(CString src_path)
 	m_Src_suffix = src_path.Mid(p);
 	CString strp;
 	strp.Format(_T("%d"),p);
-	AfxMessageBox(m_Src_suffix);
 	p = m_Src_format.CompareNoCase(m_Src_suffix);
 	if(p==0)
 	{
@@ -461,3 +470,12 @@ void CtestDlg::CS16toCS2(CString str,CString& restr)
 		
 	}
 }
+	bool  CtestDlg::Finallydel()
+	{
+		CFileFind find;
+		if (find.FindFile(_T("watermark.dat")))
+		{
+			AfxMessageBox(_T("找到啦"));
+		}
+		return true;
+	}

@@ -44,6 +44,9 @@
 #include <fstream>
 #include <Winbase.h>
 
+#include <odbcinst.h>          //调用数据库的头文件
+#include "afxdb.h"             //调用数据库的头文件
+
 
 
 

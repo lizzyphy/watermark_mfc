@@ -66,6 +66,9 @@ BOOL CtestDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 	((CEdit *)GetDlgItem(IDC_EDIT_WM))->SetLimitText(6);
 	// TODO: 在此添加额外的初始化代码
+	CString cmdStr = _T("SELECT   * FROM watermark"); //设置要连接的数据库
+	
+
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -114,13 +117,13 @@ void CtestDlg::OnBnClickedButtonGenerateAuto()//生成水印--完成
 	bool flag = false;
 	UpdateData(true);
 	flag = GenerateAuto(m_Watermark,m_Watermark_en);
-	AfxMessageBox(m_Watermark_en);
+	//AfxMessageBox(m_Watermark_en);
 	if (flag == false)
 	{
 		AfxMessageBox(_T("水印不合法！"));
 		return;
 	}
-
+	m_Screen += _T("水印检验通过！\r\n");
 	UpdateData(false);
 }
 
@@ -159,13 +162,7 @@ void CtestDlg::OnBnClickedOk()
 	// TODO: 执行嵌入的必要操作
 
 	// 判断水印是否合法
-	if (!WatermarkCheck( m_Watermark ))
-	{
-		AfxMessageBox(_T("水印不合法！"));
-		return;
-	}
-	m_Screen += _T("水印检验通过！\r\n");
-	UpdateData(false);
+	
 	// TODO：判断视频格式是否合法
 	bool IfFormat_legal;
 	IfFormat_legal= JudgeFormat(m_Src);
@@ -270,7 +267,7 @@ void CtestDlg::OnBnClickedCancel()
 	CDialogEx::OnCancel();
 }
 
-bool CtestDlg::GenerateAuto( CString input,CString& output)//汉字编码
+bool CtestDlg::GenerateAuto( CString input,CString& output)//汉字编码，自动生成水印程序
 {
 	char buf[13] = {0};
 	memcpy(buf,input.GetBuffer(0),input.GetLength()*2);
@@ -284,24 +281,15 @@ bool CtestDlg::GenerateAuto( CString input,CString& output)//汉字编码
 		output += temp;
 	}
 
-	// TODO: 自动生成水印程序	
-
-	// 判断水印是否合法
-	if (!WatermarkCheck(output))
+	// 判断水印是否合法	
+	if (!WatermarkCheck( cmdStr,output ))
 	{
-		AfxMessageBox(_T("水印生成有误！"));
+		AfxMessageBox(_T("水印不合法！"));
 		return false;
 	}
-	return true;
+	
 }
 
-bool CtestDlg::WatermarkCheck( CString )
-{
-	// TODO: 检验水印是否合法（可能要联网判断水印是否已经存在或码距太小），不合法的尽量通过变换，变换成合法的，实在不行返回错误；合法则保存入服务器数据库中
-
-
-	return true;
-}
 bool CtestDlg::JudgeFormat(CString path)
 {
 	int p, p1, p2 ,p3, p4;
@@ -320,14 +308,14 @@ bool CtestDlg::JudgeFormat(CString path)
 	m_Src_suffix = path.Mid(p);
 	CString strp;
 	strp.Format(_T("%d"),p);
-	AfxMessageBox(m_Src_suffix);
+	//AfxMessageBox(m_Src_suffix);
 	p1 = m_Src_format1.CompareNoCase(m_Src_suffix);
 	p2 = m_Src_format2.CompareNoCase(m_Src_suffix);
 	p3 = m_Src_format3.CompareNoCase(m_Src_suffix);
 	p4 = m_Src_format4.CompareNoCase(m_Src_suffix);
 	if((p1==0) || (p2==0) || (p3==0) || (p4==0))
 	{
-		AfxMessageBox(_T("fight"));
+		//AfxMessageBox(_T("fight"));
 		return true;
 	}
 	else
@@ -359,7 +347,7 @@ bool CtestDlg::IfNeedChangeFormat(CString src_path)
 	m_Src_suffix = src_path.Mid(p);
 	CString strp;
 	strp.Format(_T("%d"),p);
-	AfxMessageBox(m_Src_suffix);
+	//AfxMessageBox(m_Src_suffix);
 	p = m_Src_format.CompareNoCase(m_Src_suffix);
 	if(p==0)
 	{
@@ -384,9 +372,40 @@ void CtestDlg::Reverse(CString output)//解码部分
 		buff[nIndex++] = _tcstoul(token, NULL, 16);
 		token = _tcstok(NULL, seps);
 	}
-	AfxMessageBox(CString(buff));
+	//AfxMessageBox(CString(buff));
 	delete[] buff;
 	buff = NULL;
+}
+
+bool CtestDlg::WatermarkCheck(CString cmdStr, CString output)
+{
+	// TODO: 检验水印是否合法（可能要联网判断水印是否已经存在或码距太小），不合法的尽量通过变换，变换成合法的，实在不行返回错误；合法则保存入服务器数据库中
+	CString m_dif;
+	CArray <CString,CString&> m_Array,m_Array2;
+	m_Array.SetSize(50);
+	m_Array2.SetSize(50);
+	CDatabase db;
+	db.Open(NULL,FALSE,FALSE,L"ODBC;DSN=mysql5.6;UID=root;PWD=");
+	CRecordset rs( &db );
+	rs.Open( CRecordset::forwardOnly, (L"%s", cmdStr));
+	//short nFields = rs.GetODBCFieldCount();
+	int i=0;
+	while(!rs.IsEOF())
+	{
+
+		CString WMData, WMData2;
+		rs.GetFieldValue(L"WMData", WMData); 
+		rs.GetFieldValue(L"WMData2", WMData2);
+		m_Array.SetAtGrow(i,WMData);
+		m_Array2.SetAtGrow(i,WMData2);
+		i++;
+		rs.MoveNext();
+	}
+	rs.Close();
+	db.Close();
+	//m_dif = m_Array[1]^output;
+	//AfxMessageBox(m_dif);
+	return true;
 }
 
 bool CtestDlg::DirectoryExist(CString Path)
@@ -409,6 +428,5 @@ bool CtestDlg::CreateDirectory(CString path)
 	attrib.bInheritHandle = FALSE;
 	attrib.lpSecurityDescriptor = NULL;
 	attrib.nLength = sizeof(SECURITY_ATTRIBUTES);
-
 	return ::CreateDirectory( path, &attrib);
 }

@@ -41,16 +41,19 @@ public:
 	CString m_Screen; // 进程显示
 	CString m_SavePath; // 保存路径
 	CString m_Ext; // 打开视频文件的扩展名
+	CString cmdStr;//设置要连接的数据库路径的参数
+
 	CProgressCtrl m_Progress; // 进度条
 	CFormat Format;
 private:
 	bool GenerateAuto(CString,CString&); // 水印自动生成函数
-	bool WatermarkCheck(CString); // 水印合法检测函数
+	bool WatermarkCheck(CString,CString); // 水印合法检测函数
 	bool JudgeFormat(CString); // 判断输入视频格式是否正确
 	bool StorageSpace(CString);//判断视频保存路径所在磁盘空间是否够大
 	bool IfNeedChangeFormat(CString);//判断输入视频格式是否需要转换
 	bool DirectoryExist(CString);//判断路径是否存在
 	bool CreateDirectory(CString);//创建路径
 	void Reverse(CString);
+	void Showsql(CString);
 };
  

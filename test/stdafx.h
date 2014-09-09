@@ -42,12 +42,15 @@
 #include <Windows.h>
 #include <string>
 #include <fstream>
-#include <Winbase.h>
+#include <Winbase.h>           //调用批处理文件
+//嵌入水印
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <math.h>
 
 #include <odbcinst.h>          //调用数据库的头文件
 #include "afxdb.h"             //调用数据库的头文件
-
-
 
 
 

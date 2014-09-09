@@ -109,8 +109,6 @@ HCURSOR CtestDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
 void CtestDlg::OnBnClickedButtonGenerateAuto()//Éú³ÉË®Ó¡--Íê³É
 {
 	// ×Ô¶¯Éú³ÉË®Ó¡°´Å¥
@@ -126,7 +124,6 @@ void CtestDlg::OnBnClickedButtonGenerateAuto()//Éú³ÉË®Ó¡--Íê³É
 	m_Screen += _T("Ë®Ó¡¼ìÑéÍ¨¹ı£¡\r\n");
 	UpdateData(false);
 }
-
 
 void CtestDlg::OnBnClickedButtonScan()
 {
@@ -212,9 +209,9 @@ void CtestDlg::OnBnClickedOk()
 
 	m_Screen += _T("Ö´ĞĞÊÓÆµ¸ñÊ½×ª»»¡­\r\n");
 	UpdateData(false);
-	if(IfNeedChangeFormat(m_Src))//ÅĞ¶ÏÊÇ·ñĞèÒª×¼»»¸ñÊ½
+	if(IfNeedChangeFormat(m_Src))//ÅĞ¶ÏÊÇ·ñĞèÒª×ª»»¸ñÊ½
 	{
-		if (!Format.Video2YUV(m_Src,m_SavePath))
+		if (!Format.Video2YUV(m_Src))
 		{
 			AfxMessageBox(_T("Video2YUV³ö´í£¡"));
 			m_Screen += _T("³ÌĞòÕıÔÚ»Ø¹ö¡­\r\n");
@@ -225,7 +222,24 @@ void CtestDlg::OnBnClickedOk()
 
 	m_Screen += _T("Ö´ĞĞÇ¶Èë¡­\r\n");
 	UpdateData(false);
-	if (!Format.Embed())
+	//½«Ë®Ó¡´Ó16½øÖÆ×ªÎª2½øÖÆ
+	CString watermark_en2;
+	CS16toCS2(m_Watermark_en,watermark_en2);
+	char* watermark = CStochar(watermark_en2);
+	for(int j=0;j<96;j++)
+	{
+		watermark[j] = watermark[j]-48;
+	}
+	//½«Ë®Ó¡´ÓCString×ªÎªchar
+	FILE *fp;
+	fp = fopen("watermark.dat","wb");
+	fwrite(watermark, 4, 96, fp);
+	fclose(fp);
+
+	//½«´ò¿ª¡¢±£´æµØÖ·´ÓCString×ªÎªchar
+	char* srcpath = CStochar(m_Src);
+	char* savepath = CStochar(m_SavePath);
+	if (!Format.Embed(srcpath,savepath))
 	{
 		AfxMessageBox(_T("Embed³ö´í£¡"));
 		m_Screen += _T("³ÌĞòÕıÔÚ»Ø¹ö¡­\r\n");
@@ -256,6 +270,10 @@ void CtestDlg::OnBnClickedOk()
 	// TODO£ºÅĞ¶ÏÊÇ·ñÖ´ĞĞ³É¹¦£¬Èô²»³É¹¦Ôò·µ»Ø´íÎóĞÅÏ¢
 
 	m_Screen += _T("´ó¹¦¸æ³É£¡\r\n");
+	if(!Finallydel())
+	{
+		AfxMessageBox(_T("É¾³ıÎÄ¼ş³ö´í"));
+	}
 	UpdateData(false);
 	//CDialogEx::OnOK();
 }
@@ -290,6 +308,7 @@ bool CtestDlg::GenerateAuto( CString input,CString& output)//ºº×Ö±àÂë£¬×Ô¶¯Éú³ÉË
 	
 }
 
+
 bool CtestDlg::JudgeFormat(CString path)
 {
 	int p, p1, p2 ,p3, p4;
@@ -323,6 +342,7 @@ bool CtestDlg::JudgeFormat(CString path)
 		return false;
 	}
 }
+
 bool CtestDlg::StorageSpace(CString path)
 {
 	int ipos = path.ReverseFind('\\');
@@ -335,6 +355,7 @@ bool CtestDlg::StorageSpace(CString path)
 	}
 	return 1;
 }
+
 bool CtestDlg::IfNeedChangeFormat(CString src_path)
 {
 	int p;
@@ -358,6 +379,7 @@ bool CtestDlg::IfNeedChangeFormat(CString src_path)
 		return true;//ĞèÒª×ª»»¸ñÊ½
 	}
 }
+
 void CtestDlg::Reverse(CString output)//½âÂë²¿·Ö
 {
 	int nCount = 1;
@@ -422,6 +444,7 @@ bool CtestDlg::DirectoryExist(CString Path)
 	FindClose(hFind);
 	return ret;
 }
+
 bool CtestDlg::CreateDirectory(CString path)
 {
 	SECURITY_ATTRIBUTES attrib;
@@ -430,3 +453,52 @@ bool CtestDlg::CreateDirectory(CString path)
 	attrib.nLength = sizeof(SECURITY_ATTRIBUTES);
 	return ::CreateDirectory( path, &attrib);
 }
+
+char* CtestDlg::CStochar(CString str)
+{
+	int len =WideCharToMultiByte(CP_ACP,0,str,str.GetLength(),NULL,0,NULL,NULL);
+	//Îª¶à×Ö½Ú×Ö·ûÊı×éÉêÇë¿Õ¼ä£¬Êı×é´óĞ¡Îª°´×Ö½Ú¼ÆËãµÄ¿í×Ö½Ú×Ö½Ú´óĞ¡
+	char * p = new char[len+1];  //ÒÔ×Ö½ÚÎªµ¥Î»
+	//¿í×Ö½Ú±àÂë×ª»»³É¶à×Ö½Ú±àÂë
+	WideCharToMultiByte(CP_ACP,0,str,str.GetLength(),p,len,NULL,NULL);
+	p[len] = '\0';   //¶à×Ö½Ú×Ö·ûÒÔ'\0'½áÊø
+	return p;
+}
+
+void CtestDlg::CS16toCS2(CString str,CString& restr)
+{
+	int len = str.GetLength();
+	restr = _T("");
+	for(int i = 0; i < len; i ++)
+	{
+		switch (str[i]){
+			case '0':restr = restr + _T("0000"); break;
+			case '1':restr = restr + _T("0001"); break; 
+			case '2':restr = restr + _T("0010"); break;
+			case '3':restr = restr + _T("0011"); break;
+			case '4':restr = restr + _T("0100"); break;
+			case '5':restr = restr + _T("0101"); break;
+			case '6':restr = restr + _T("0110"); break;
+			case '7':restr = restr + _T("0111"); break;
+			case '8':restr = restr + _T("1000"); break;
+			case '9':restr = restr + _T("1001"); break;
+			case 'A':restr = restr + _T("1010"); break;
+			case 'B':restr = restr + _T("1011"); break;
+			case 'C':restr = restr + _T("1100"); break;
+			case 'D':restr = restr + _T("1101"); break;
+			case 'E':restr = restr + _T("1110"); break;
+			case 'F':restr = restr + _T("1111"); break;
+			default:restr = restr + _T("0000"); break;
+		}
+		
+	}
+}
+	bool  CtestDlg::Finallydel()
+	{
+		CFileFind find;
+		if (find.FindFile(_T("watermark.dat")))
+		{
+			AfxMessageBox(_T("ÕÒµ½À²"));
+		}
+		return true;
+	}

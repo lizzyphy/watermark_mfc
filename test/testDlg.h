@@ -54,6 +54,8 @@ private:
 	bool DirectoryExist(CString);//判断路径是否存在
 	bool CreateDirectory(CString);//创建路径
 	void Reverse(CString);
-	void Showsql(CString);
+	char* CStochar(CString);
+	void CS16toCS2(CString,CString&);
+	bool Finallydel();
 };
  

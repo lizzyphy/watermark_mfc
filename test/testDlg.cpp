@@ -115,7 +115,6 @@ void CtestDlg::OnBnClickedButtonGenerateAuto()//生成水印--完成
 	bool flag = false;
 	UpdateData(true);
 	flag = GenerateAuto(m_Watermark,m_Watermark_en);
-	//AfxMessageBox(m_Watermark_en);
 	if (flag == false)
 	{
 		AfxMessageBox(_T("水印不合法！"));
@@ -158,8 +157,6 @@ void CtestDlg::OnBnClickedOk()
 	UpdateData(true);
 	CString m_Src_en;
 	// TODO: 执行嵌入的必要操作
-
-	// 判断水印是否合法
 	
 	// 判断视频格式是否合法
 	bool IfFormat_legal;
@@ -346,7 +343,6 @@ bool CtestDlg::JudgeFormat(CString path)
 	p4 = m_Src_format4.CompareNoCase(m_Src_suffix);
 	if((p1==0) || (p2==0) || (p3==0) || (p4==0))
 	{
-		//AfxMessageBox(_T("fight"));
 		return true;
 	}
 	else
@@ -380,7 +376,6 @@ bool CtestDlg::IfNeedChangeFormat(CString src_path)
 	m_Src_suffix = src_path.Mid(p);
 	CString strp;
 	strp.Format(_T("%d"),p);
-	//AfxMessageBox(m_Src_suffix);
 	p = m_Src_format.CompareNoCase(m_Src_suffix);
 	if(p==0)
 	{
@@ -406,7 +401,6 @@ void CtestDlg::Reverse(CString output)//解码部分
 		buff[nIndex++] = _tcstoul(token, NULL, 16);
 		token = _tcstok(NULL, seps);
 	}
-	//AfxMessageBox(CString(buff));
 	delete[] buff;
 	buff = NULL;
 }
@@ -475,6 +469,7 @@ bool CtestDlg::WatermarkCheck(CString cmdStr, CString output)
 		}
 		rs.MoveNext();
 	}
+
 	rs.Close();
 	db.Close();
 	

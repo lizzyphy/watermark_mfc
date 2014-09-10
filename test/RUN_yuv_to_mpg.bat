@@ -1,2 +1,1 @@
-ffmpeg.exe -s 720x576 -i H:\衡水第一次外出实验\1到1500与1751到3750与4251到6750与7001到10000有水印_720x576.yuv -target film-dvd -r 25  -s 720x576  H:\衡水第一次外出实验\1到1500与1751到3750与4251到6750与7001到10000有水印_720x576.vob
-pause
+ffmpeg.exe -s 720x576 -i water315_en.yuv -target film-dvd -r 25  -s 720x576 C:\Users\Administrator\Desktop\video\1.vob

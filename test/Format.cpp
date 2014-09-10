@@ -79,8 +79,17 @@ bool CFormat::Video2YUV(CString src_path) //视频转换格式
 	
 }
 
-bool CFormat::YUV2Video()
+bool CFormat::YUV2Video(CString save_path)
 {
+	CString command_bat;
+	CString src_path;
+	src_path = _T("water315_en.yuv");
+	command_bat = _T("ffmpeg.exe -s 720x576 -i ") + src_path + _T(" -target film-dvd -r 25  -s 720x576 ")+save_path+_T("\r\n");
+	CStdioFile file;
+	file.Open(_T("RUN_yuv_to_mpg.bat"),CFile::modeWrite);
+	file.WriteString(command_bat);
+	file.Close();
+	WinExec("RUN_yuv_to_mpg.bat",SW_SHOW); //调用批处理文件
 	return true;
 }
 

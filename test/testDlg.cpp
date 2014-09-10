@@ -153,6 +153,7 @@ void CtestDlg::OnBnClickedButtonSave()
 void CtestDlg::OnBnClickedOk()
 {
 	UpdateData(true);
+	CString m_Src_en;
 	// TODO: 执行嵌入的必要操作
 
 	// 判断水印是否合法
@@ -163,40 +164,39 @@ void CtestDlg::OnBnClickedOk()
 	}
 	m_Screen += _T("水印检验通过！\r\n");
 	UpdateData(false);
-	// TODO：判断视频格式是否合法
+	// 判断视频格式是否合法
 	bool IfFormat_legal;
 	IfFormat_legal= JudgeFormat(m_Src);
 	if (!IfFormat_legal)
 	{
 		AfxMessageBox(_T("待嵌入视频格式不合法"));
 	}
-	// TODO：判断视频是否存在
+	// 判断视频是否存在
 	if (!PathFileExists(m_Src))
 	{
 		AfxMessageBox(_T("待嵌入视频不存在"));//不存在
 	}
-	// TODO：判断视频保存格式是否合法
+	// 判断视频保存格式是否合法
 	
 	IfFormat_legal = JudgeFormat(m_SavePath);
 	if (!IfFormat_legal)
 	{
 		AfxMessageBox(_T("视频保存格式不合法"));
 	}
-	// TODO：判断视频保存路径所在磁盘空间是否够大
+	// 判断视频保存路径所在磁盘空间是否够大
 	if(!StorageSpace(m_SavePath))
 	{
 		AfxMessageBox(_T("视频保存路径所在磁盘空间小于2G"));
 	}
-	// TODO：判断视频保存路径是否存在，没有则新建一个
+	// 判断视频保存路径是否存在，没有则新建一个
 	int ipos = m_SavePath.ReverseFind('\\');
 	CString m_Path = m_SavePath.Left(ipos);//存储路径去除文件名
-	//AfxMessageBox(m_SavePath);
 	if(!DirectoryExist(m_Path))
 	{
 		CreateDirectory(m_Path) ;//不存在就在目标路径上创建一个文件夹
 	}
 	
-	// TODO：执行嵌入，若不成功则删除残留文件
+	// 执行嵌入，若不成功则删除残留文件
 
 	Format.m_Src = m_Src;
 	Format.m_SavePath = m_SavePath;
@@ -212,7 +212,7 @@ void CtestDlg::OnBnClickedOk()
 
 	m_Screen += _T("执行视频格式转换…\r\n");
 	UpdateData(false);
-	if(IfNeedChangeFormat(m_Src))//判断是否需要转换格式
+	if(IfNeedChangeFormat(m_Src))//判断读取文件是否需要转换格式
 	{
 		if (!Format.Video2YUV(m_Src))
 		{
@@ -221,6 +221,19 @@ void CtestDlg::OnBnClickedOk()
 			UpdateData(false);
 			Format.DelectAll();
 		}
+		m_Src_en = _T("water315.yuv");
+	}
+	else
+	{
+		m_Src_en = m_Src;
+	}
+	if(IfNeedChangeFormat(m_SavePath))//判断嵌水印文件是否需要转换格式
+	{
+		m_Path = _T("water315_en.yuv");
+	}
+	else
+	{
+		m_Path = m_SavePath;
 	}
 
 	m_Screen += _T("执行嵌入…\r\n");
@@ -240,8 +253,8 @@ void CtestDlg::OnBnClickedOk()
 	fclose(fp);
 
 	//将打开、保存地址从CString转为char
-	char* srcpath = CStochar(m_Src);
-	char* savepath = CStochar(m_SavePath);
+	char* srcpath = CStochar(m_Src_en);
+	char* savepath = CStochar(m_Path);
 	if (!Format.Embed(srcpath,savepath))
 	{
 		AfxMessageBox(_T("Embed出错！"));
@@ -252,14 +265,17 @@ void CtestDlg::OnBnClickedOk()
 
 	m_Screen += _T("执行视频格式恢复…\r\n");
 	UpdateData(false);
-	if (!Format.YUV2Video())
+	if(IfNeedChangeFormat(m_SavePath))
 	{
-		AfxMessageBox(_T("YUV2Video出错！"));
-		m_Screen += _T("程序正在回滚…\r\n");
-		UpdateData(false);
-		Format.DelectAll();
+		if (!Format.YUV2Video(m_SavePath))
+			{
+				AfxMessageBox(_T("YUV2Video出错！"));
+				m_Screen += _T("程序正在回滚…\r\n");
+				UpdateData(false);
+				Format.DelectAll();
+			}
 	}
-
+	
 	m_Screen += _T("执行音频合成…\r\n");
 	UpdateData(false);
 	if (!Format.AudioCombine())
@@ -475,7 +491,15 @@ void CtestDlg::CS16toCS2(CString str,CString& restr)
 		CFileFind find;
 		if (find.FindFile(_T("watermark.dat")))
 		{
-			AfxMessageBox(_T("找到啦"));
+			DeleteFile(_T("watermark.dat"));
+		}
+		if (find.FindFile(_T("water315.yuv")))
+		{
+			DeleteFile(_T("water315.yuv"));
+		}
+		if (find.FindFile(_T("water315_en.yuv")))
+		{
+			DeleteFile(_T("water315_en.yuv"));
 		}
 		return true;
 	}

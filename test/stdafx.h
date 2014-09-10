@@ -49,6 +49,9 @@
 #include <conio.h>
 #include <math.h>
 
+#include <odbcinst.h>          //调用数据库的头文件
+#include "afxdb.h"             //调用数据库的头文件
+
 
 
 #ifdef _UNICODE

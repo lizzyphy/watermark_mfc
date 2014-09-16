@@ -64,11 +64,11 @@ bool CFormat::AudioCombine()
 	return true;
 }
 
-bool CFormat::Video2YUV(CString src_path) //视频转换格式
+bool CFormat::Video2YUV(CString src_path,CString save_path) //视频转换格式
 { 
 	CString command_bat;
-	CString save_path;
-	save_path = _T("water315.yuv");
+	save_path = save_path + _T("\\water315.yuv");
+//	AfxMessageBox(save_path);
 	command_bat = _T("ffmpeg.exe -s 720x576 -i ") + src_path + _T(" -s 720x576 ")+save_path+_T("\r\n");
 	CStdioFile file;
 	file.Open(_T("RUN.bat"),CFile::modeWrite);
@@ -76,14 +76,12 @@ bool CFormat::Video2YUV(CString src_path) //视频转换格式
 	file.Close();
 	WinExec("RUN.bat",SW_SHOW); //调用批处理文件
 	return true;
-	
 }
 
-bool CFormat::YUV2Video(CString save_path)
+bool CFormat::YUV2Video(CString save_path,CString src_path)
 {
+
 	CString command_bat;
-	CString src_path;
-	src_path = _T("water315_en.yuv");
 	command_bat = _T("ffmpeg.exe -s 720x576 -i ") + src_path + _T(" -target film-dvd -r 25  -s 720x576 ")+save_path+_T("\r\n");
 	CStdioFile file;
 	file.Open(_T("RUN_yuv_to_mpg.bat"),CFile::modeWrite);
@@ -93,19 +91,23 @@ bool CFormat::YUV2Video(CString save_path)
 	return true;
 }
 
-bool CFormat::Embed(char* srcpath,char* savepath)
+bool CFormat::Embed(char* srcpath,char* savepath,int frame)
 {
 	FILE *op;
 	op = fopen("watermark.dat","rb");
 	fread(watermark, 1, WMLENGTH, op);
 	fclose(op);
+
 	FILE *fp;
 	__int64 offset;				//偏移计算使用long long型，方便访问大于2G的文件
 	int num;
 	int i,j;
 	double CalValue, CalFloor;				//为了将实数取整的中间变量
 	char combel[100] = "del ";
-	for (num = 0; num < FRAMES; num++)
+/*	CString str;
+	str.Format(_T("%d"),frame);
+	AfxMessageBox(str);*/
+	for (num = 0; num < frame; num++)
 	{
 		//读一帧YUV视频
 		if (fp = fopen(srcpath,"rb"))
@@ -172,9 +174,11 @@ bool CFormat::Embed(char* srcpath,char* savepath)
 				}
 			}
 		}
+	//	AfxMessageBox(_T("变换结束"));
 		//写一帧YUV视频，存储过程
 		if ( fp=fopen(savepath,"ab" ) )   //"ab"
 		{
+	//		AfxMessageBox(_T("写入"));
 			fwrite(Y, 1, NWIDTH*NHEIGHT, fp);
 			fseek(fp,NWIDTH*NHEIGHT,SEEK_SET);
 			fwrite(U, 1, (NWIDTH/2)*(NHEIGHT/2), fp);
@@ -652,24 +656,3 @@ void  CFormat::WaveletTransI2D_1()
 		}
 	}
 }
-
-bool CFormat::DelectAll()
-{
-	return true;
-}
-
-/*bool CFormat::MySystem(const CString& cmd, const CString& par, int nShow)
-{
-	SHELLEXECUTEINFO ShExecInfo = {0};
-	ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-	ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-	ShExecInfo.hwnd = NULL;
-	ShExecInfo.lpVerb = NULL;
-	ShExecInfo.lpFile = cmd.c_str();//调用的程序名
-	ShExecInfo.lpParameters = par.c_str();//调用程序的命令行参数
-	ShExecInfo.lpDirectory = NULL;
-	ShExecInfo.nShow = SW_HIDE;//窗口状态为隐藏
-	ShExecInfo.hInstApp = NULL;
-	ShellExecuteEx(&ShExecInfo);
-	WaitForSingleObject(ShExecInfo.hProcess,INFINITE);//等到该进程结束
-}*/

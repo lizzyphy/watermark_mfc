@@ -57,5 +57,6 @@ private:
 	char* CStochar(CString);
 	void CS16toCS2(CString,CString&);
 	bool Finallydel();
+	int Readframe(char*);
 };
  

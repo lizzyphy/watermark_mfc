@@ -9,6 +9,9 @@
 #include <shlwapi.h>
 #pragma comment(lib,"shlwapi.lib")
 #include <windows.h>  
+#include <io.h>
+#include <sys/stat.h>
+#include <afx.h>
 using namespace std; 
 
 
@@ -67,8 +70,9 @@ BOOL CtestDlg::OnInitDialog()
 	((CEdit *)GetDlgItem(IDC_EDIT_WM))->SetLimitText(6);
 	// TODO: 在此添加额外的初始化代码
 	CString cmdStr = _T("SELECT   * FROM watermark"); //设置要连接的数据库
-	
-
+	m_Progress.SetRange(0,5);
+	m_Progress.SetStep(1);
+	m_Progress.SetPos(0);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -155,16 +159,16 @@ void CtestDlg::OnBnClickedButtonSave()
 
 void CtestDlg::OnBnClickedOk()
 {
+
 	UpdateData(true);
 	CString m_Src_en;
+	CString m_Path_en;
 	// TODO: 执行嵌入的必要操作
 
 	// 判断水印是否合法
 	
 	// 判断视频格式是否合法
-	bool IfFormat_legal;
-	IfFormat_legal= JudgeFormat(m_Src);
-	if (!IfFormat_legal)
+	if (!JudgeFormat(m_Src))
 	{
 		AfxMessageBox(_T("待嵌入视频格式不合法"));
 	}
@@ -175,8 +179,10 @@ void CtestDlg::OnBnClickedOk()
 	}
 	// 判断视频保存格式是否合法
 	
-	IfFormat_legal = JudgeFormat(m_SavePath);
-	if (!IfFormat_legal)
+	m_Screen += _T("待嵌入视频格式检测完成…\r\n");
+	m_Progress.SetPos(1);
+	UpdateData(false);
+	if (!JudgeFormat(m_SavePath))
 	{
 		AfxMessageBox(_T("视频保存格式不合法"));
 	}
@@ -190,47 +196,59 @@ void CtestDlg::OnBnClickedOk()
 	{
 		CreateDirectory(m_Path) ;//不存在就在目标路径上创建一个文件夹
 	}
-	
+	m_Screen += _T("视频保存格式检测完成…\r\n");
+	m_Progress.SetPos(2);
+	UpdateData(false);
 	// 执行嵌入，若不成功则删除残留文件
-
+	MSG msg; 
+	while(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) 
+	{ 
+		TranslateMessage(&msg); 
+		DispatchMessage(&msg);
+	}
 	Format.m_Src = m_Src;
 	Format.m_SavePath = m_SavePath;
-	m_Screen += _T("执行音频分离…\r\n");
+/*	m_Screen += _T("执行音频分离…\r\n");
 	UpdateData(false);
 	if (!Format.AudioSeparation())
 	{
 		AfxMessageBox(_T("AudioSeparation出错！"));
 		m_Screen += _T("程序正在回滚…\r\n");
 		UpdateData(false);
-		Format.DelectAll();
+		Finallydel();
 	}
-
-	m_Screen += _T("执行视频格式转换…\r\n");
-	UpdateData(false);
+*/
+	if(IfNeedChangeFormat(m_Src))
 	{
-		if (!Format.Video2YUV(m_Src))
+		m_Screen += _T("执行视频格式转换…\r\n");
+		UpdateData(false);
+		if (!Format.Video2YUV(m_Src,m_Path))
 		{
 			AfxMessageBox(_T("Video2YUV出错！"));
 			m_Screen += _T("程序正在回滚…\r\n");
 			UpdateData(false);
-			Format.DelectAll();
+			Finallydel();
 		}
-		m_Src_en = _T("water315.yuv");
+		m_Src_en =m_Path + _T("\\water315.yuv");
 	}
 	else
 	{
 		m_Src_en = m_Src;
 	}
+//	AfxMessageBox(m_Src_en);
+	
 	if(IfNeedChangeFormat(m_SavePath))//判断嵌水印文件是否需要转换格式
 	{
-		m_Path = _T("water315_en.yuv");
+		
+		m_Path_en =m_Path + _T("\\water315_en.yuv");
 	}
 	else
 	{
-		m_Path = m_SavePath;
+		m_Path_en = m_SavePath;
 	}
-
+//	AfxMessageBox(m_Path_en);
 	m_Screen += _T("执行嵌入…\r\n");
+	m_Progress.SetPos(3);
 	UpdateData(false);
 	//将水印从16进制转为2进制
 	CString watermark_en2;
@@ -245,48 +263,49 @@ void CtestDlg::OnBnClickedOk()
 	fp = fopen("watermark.dat","wb");
 	fwrite(watermark, 4, 96, fp);
 	fclose(fp);
-
+	Sleep(1000);
 	//将打开、保存地址从CString转为char
 	char* srcpath = CStochar(m_Src_en);
-	char* savepath = CStochar(m_Path);
-	if (!Format.Embed(srcpath,savepath))
+	int frame = Readframe(srcpath);
+	char* savepath = CStochar(m_Path_en);
+	if (!Format.Embed(srcpath,savepath,frame))
 	{
 		AfxMessageBox(_T("Embed出错！"));
 		m_Screen += _T("程序正在回滚…\r\n");
 		UpdateData(false);
-		Format.DelectAll();
+		Finallydel();
 	}
 
-	m_Screen += _T("执行视频格式恢复…\r\n");
-	UpdateData(false);
 	if(IfNeedChangeFormat(m_SavePath))
 	{
-		if (!Format.YUV2Video(m_SavePath))
+		m_Screen += _T("执行保存视频格式恢复…\r\n");
+		UpdateData(false);
+		if (!Format.YUV2Video(m_SavePath,m_Path_en))
 			{
 				AfxMessageBox(_T("YUV2Video出错！"));
 				m_Screen += _T("程序正在回滚…\r\n");
 				UpdateData(false);
-				Format.DelectAll();
+				Finallydel();
 			}
 	}
 	
-	m_Screen += _T("执行音频合成…\r\n");
+/*	m_Screen += _T("执行音频合成…\r\n");
 	UpdateData(false);
 	if (!Format.AudioCombine())
 	{
 		AfxMessageBox(_T("AudioCombine出错！"));
 		m_Screen += _T("程序正在回滚…\r\n");
 		UpdateData(false);
-		Format.DelectAll();
+		Finallydel();
 	}
-
+*/
 	// TODO：判断是否执行成功，若不成功则返回错误信息
-
-	m_Screen += _T("大功告成！\r\n");
 	if(!Finallydel())
 	{
 		AfxMessageBox(_T("删除文件出错"));
 	}
+	m_Screen += _T("大功告成！\r\n");
+	m_Progress.SetPos(5);
 	UpdateData(false);
 	//CDialogEx::OnOK();
 }
@@ -313,12 +332,12 @@ bool CtestDlg::GenerateAuto( CString input,CString& output)//汉字编码
 	}
 
 	// 判断水印是否合法	
-	if (!WatermarkCheck( cmdStr,output ))
+	/*if (!WatermarkCheck( cmdStr,output ))
 	{
 		AfxMessageBox(_T("水印不合法！"));
 		return false;
-	}
-	
+	}*/
+	return true;
 }
 
 
@@ -412,7 +431,7 @@ void CtestDlg::Reverse(CString output)//解码部分
 	buff = NULL;
 }
 
-bool CtestDlg::WatermarkCheck(CString cmdStr, CString output)
+/*bool CtestDlg::WatermarkCheck(CString cmdStr, CString output)
 {
 	// TODO: 检验水印是否合法（可能要联网判断水印是否已经存在或码距太小），不合法的尽量通过变换，变换成合法的，实在不行返回错误；合法则保存入服务器数据库中
 	CString m_dif;
@@ -441,7 +460,7 @@ bool CtestDlg::WatermarkCheck(CString cmdStr, CString output)
 	//m_dif = m_Array[1]^output;
 	//AfxMessageBox(m_dif);
 	return true;
-}
+}*/
 
 bool CtestDlg::DirectoryExist(CString Path)
 {
@@ -506,20 +525,30 @@ void CtestDlg::CS16toCS2(CString str,CString& restr)
 		
 	}
 }
-	bool  CtestDlg::Finallydel()
+bool  CtestDlg::Finallydel()
+{
+	CFileFind find;
+	/*if (find.FindFile(_T("watermark.dat")))
 	{
-		CFileFind find;
-		if (find.FindFile(_T("watermark.dat")))
-		{
-			DeleteFile(_T("watermark.dat"));
-		}
-		if (find.FindFile(_T("water315.yuv")))
-		{
-			DeleteFile(_T("water315.yuv"));
-		}
-		if (find.FindFile(_T("water315_en.yuv")))
-		{
-			DeleteFile(_T("water315_en.yuv"));
-		}
-		return true;
+		DeleteFile(_T("watermark.dat"));
 	}
+	if (find.FindFile(_T("water315.yuv")))
+	{
+		DeleteFile(_T("water315.yuv"));
+	}*/
+	if (find.FindFile(_T("water315_en.yuv")))
+	{
+		DeleteFile(_T("water315_en.yuv"));
+	}
+	return true;
+}
+
+int CtestDlg::Readframe(char* srcpath)
+{
+	struct _stat info;
+	_stat(srcpath, &info);
+	int size = info.st_size;
+	int frame = size/(720*576*1.5);
+	return frame;
+}
+	

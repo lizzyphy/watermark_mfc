@@ -41,7 +41,6 @@ public:
 	CString m_Screen; // 进程显示
 	CString m_SavePath; // 保存路径
 	CString m_Ext; // 打开视频文件的扩展名
-	CString cmdStr;//设置要连接的数据库路径的参数
 
 	CProgressCtrl m_Progress; // 进度条
 	CFormat Format;
@@ -55,8 +54,8 @@ private:
 	bool CreateDirectory(CString);//创建路径
 	void Reverse(CString);
 	char* CStochar(CString);
-	void CS16toCS2(CString,CString&);
+	void CS16toCS2(CString,CString&); //十六进制转二进制   
 	bool Finallydel();
-	int Readframe(char*);
+	CString chartoCS(char*);      //char*类型转换为CString类型
 };
  

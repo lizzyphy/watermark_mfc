@@ -227,7 +227,7 @@ void CtestDlg::OnBnClickedOk()
 			AfxMessageBox(_T("Video2YUV出错！"));
 			m_Screen += _T("程序正在回滚…\r\n");
 			UpdateData(false);
-			Finallydel();
+			Finallydel(m_Path);
 		}
 		m_Src_en =m_Path + _T("\\water315.yuv");
 	}
@@ -273,7 +273,7 @@ void CtestDlg::OnBnClickedOk()
 		AfxMessageBox(_T("Embed出错！"));
 		m_Screen += _T("程序正在回滚…\r\n");
 		UpdateData(false);
-		Finallydel();
+		Finallydel(m_Path);
 	}
 
 	if(IfNeedChangeFormat(m_SavePath))
@@ -285,10 +285,10 @@ void CtestDlg::OnBnClickedOk()
 				AfxMessageBox(_T("YUV2Video出错！"));
 				m_Screen += _T("程序正在回滚…\r\n");
 				UpdateData(false);
-				Finallydel();
+				Finallydel(m_Path);
 			}
 	}
-	
+	Sleep(1000);
 /*	m_Screen += _T("执行音频合成…\r\n");
 	UpdateData(false);
 	if (!Format.AudioCombine())
@@ -300,7 +300,7 @@ void CtestDlg::OnBnClickedOk()
 	}
 */
 	// TODO：判断是否执行成功，若不成功则返回错误信息
-	if(!Finallydel())
+	if(!Finallydel(m_Path))
 	{
 		AfxMessageBox(_T("删除文件出错"));
 	}
@@ -525,20 +525,20 @@ void CtestDlg::CS16toCS2(CString str,CString& restr)
 		
 	}
 }
-bool  CtestDlg::Finallydel()
+bool  CtestDlg::Finallydel(CString path)
 {
 	CFileFind find;
-	/*if (find.FindFile(_T("watermark.dat")))
+	if (find.FindFile(path + _T("\\watermark.dat")))
 	{
-		DeleteFile(_T("watermark.dat"));
+		DeleteFile(path + _T("\\watermark.dat"));
 	}
-	if (find.FindFile(_T("water315.yuv")))
+	if (find.FindFile(path + _T("\\water315.yuv")))
 	{
-		DeleteFile(_T("water315.yuv"));
-	}*/
-	if (find.FindFile(_T("water315_en.yuv")))
+		DeleteFile(path + _T("\\water315.yuv"));
+	}
+	if (find.FindFile(path + _T("\\water315_en.yuv")))
 	{
-		DeleteFile(_T("water315_en.yuv"));
+		DeleteFile(path + _T("\\water315_en.yuv"));
 	}
 	return true;
 }

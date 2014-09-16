@@ -55,7 +55,8 @@ private:
 	void Reverse(CString);
 	char* CStochar(CString);
 	void CS16toCS2(CString,CString&); //十六进制转二进制   
-	bool Finallydel();
+	bool Finallydel(CString);
 	CString chartoCS(char*);      //char*类型转换为CString类型
+	int Readframe(char*);
 };
  

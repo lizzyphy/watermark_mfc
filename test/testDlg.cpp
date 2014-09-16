@@ -204,6 +204,7 @@ void CtestDlg::OnBnClickedOk()
 
 	m_Screen += _T("执行视频格式转换…\r\n");
 	UpdateData(false);
+	if(IfNeedChangeFormat(m_Src))
 	{
 		if (!Format.Video2YUV(m_Src))
 		{
@@ -469,7 +470,9 @@ bool CtestDlg::WatermarkCheck(CString cmdStr, CString output)
 		}
 		rs.MoveNext();
 	}
-
+	CString addstr;
+	addstr.Format(L"insert into watermark values('%d','%d','%d','%s','%s')", 8, 99, 399, output,output);
+	db.ExecuteSQL(addstr);
 	rs.Close();
 	db.Close();
 	

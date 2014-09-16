@@ -30,10 +30,9 @@ public:
 
 	bool AudioSeparation();
 	bool AudioCombine();
-	bool Video2YUV(CString);
-	bool YUV2Video(CString);
-	bool Embed(char*,char*);
-	bool DelectAll();
+	bool Video2YUV(CString,CString);
+	bool YUV2Video(CString,CString);
+	bool Embed(char*,char*,int);
 	bool MySystem(const CString&, const CString&, int );//调用新的进程，完成视频格式转换
 };
 

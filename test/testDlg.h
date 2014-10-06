@@ -59,5 +59,6 @@ private:
 	CString chartoCS(char*);      //char*类型转换为CString类型
 	int Readframe(char*);
 	void Show_now();
+	CString HTTP_GET_DATA(CString);//利用HTTP协议联网判断水印是否合法
 };
  

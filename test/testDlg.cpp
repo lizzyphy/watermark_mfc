@@ -117,7 +117,6 @@ void CtestDlg::OnBnClickedButtonGenerateAuto()//生成水印--完成
 	bool flag = false;
 	UpdateData(true);
 	flag = GenerateAuto(m_Watermark,m_Watermark_en);
-	//AfxMessageBox(m_Watermark_en);
 	if (flag == false)
 	{
 		AfxMessageBox(_T("水印不合法！"));
@@ -324,12 +323,25 @@ bool CtestDlg::GenerateAuto( CString input,CString& output)//汉字编码
 	}
 
 	// 判断水印是否合法	
+	CString canshu , http_re;
+	canshu = output;
+	AfxMessageBox(canshu);
+	CString re_url = _T("http://duikang/wm/test?id=");
+	re_url += canshu;
+	//通过 http GET 协议来获取并保存文件
+	http_re = HTTP_GET_DATA(re_url);
+	if(http_re == "1"){
+		return true;
+	}else {
+		return false;
+	}
+
 	/*if (!WatermarkCheck( cmdStr,output ))
 	{
 		AfxMessageBox(_T("水印不合法！"));
 		return false;
 	}*/
-	return true;
+	
 }
 
 
@@ -558,4 +570,53 @@ void CtestDlg::Show_now()
 		DispatchMessage(&msg);
 	}
 }
-	
+
+CString CtestDlg::HTTP_GET_DATA(CString strURL)  
+{  
+	CString re,strFormData;
+	CInternetSession session;  
+	CHttpConnection* pHttpConnection = NULL;  
+	CHttpFile *pHttpFile = NULL;  
+	CString strServer, strObject;  
+	INTERNET_PORT wPort;  
+	DWORD dwType;  
+
+	if(!AfxParseURL(strURL, dwType, strServer, strObject, wPort))  
+	{ 
+		re = "0";
+		return re;//URL解析错误  
+	}  
+	pHttpConnection = session.GetHttpConnection(strServer, wPort);  
+	pHttpFile = pHttpConnection->OpenRequest(CHttpConnection::HTTP_VERB_GET, strObject);  
+
+	CString szHeaders = L"Accept: audio/x-aiff, audio/basic, audio/midi,\
+						 audio/mpeg, audio/wav, image/jpeg, image/gif, image/jpg, image/png,\
+						 image/mng, image/bmp, text/plain, text/html, text/htm\r\n";
+	strFormData = L"";
+
+	pHttpFile->SendRequest(szHeaders,(LPVOID)(LPCTSTR)strFormData, strFormData.GetLength());  
+	DWORD dwRet;  
+	pHttpFile->QueryInfoStatusCode(dwRet);  
+	if(dwRet != HTTP_STATUS_OK)  
+	{ 
+		CString errText;
+		errText.Format(L"POST出错，错误码：%d", dwRet);
+		AfxMessageBox(errText);
+		re = "0";   //联网失败
+	}  
+	else {
+		CString szData,szAllData;
+		int nread = 0;
+		while((nread = pHttpFile->ReadString(szData))>0)
+		{
+			//读取网页返回值
+			szAllData += szData;
+		}
+		pHttpFile->Close();
+		re = szAllData;
+		//AfxMessageBox(szAllData);
+		//AfxMessageBox(_T("获取数据成功"));
+	} 
+	session.Close();  
+	return re;  
+}  

@@ -326,7 +326,8 @@ bool CtestDlg::GenerateAuto( CString input,CString& output)//汉字编码
 	CString canshu , http_re;
 	canshu = output;
 	AfxMessageBox(canshu);
-	CString re_url = _T("http://duikang/wm/test?id=");
+	//CString re_url = _T("http://duikang/wm/test?id=");
+	CString re_url = _T("http://tx.te168.cn/wm/test?id=");
 	re_url += canshu;
 	//通过 http GET 协议来获取并保存文件
 	http_re = HTTP_GET_DATA(re_url);

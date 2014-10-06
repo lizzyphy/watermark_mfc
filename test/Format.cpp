@@ -65,7 +65,7 @@ bool CFormat::AudioCombine()
 }
 
 bool CFormat::Video2YUV(CString src_path,CString save_path) //视频转换格式
-{ 
+{ 	
 	CString command_bat;
 	save_path = save_path + _T("\\water315.yuv");
 	command_bat = _T("ffmpeg.exe -s 720x576 -i ") + src_path + _T(" -s 720x576 ")+save_path+_T("\r\n");
@@ -74,6 +74,11 @@ bool CFormat::Video2YUV(CString src_path,CString save_path) //视频转换格式
 	file.WriteString(command_bat);
 	file.Close();
 	WinExec("RUN.bat",SW_HIDE); //调用批处理文件
+	CFileFind find;
+	while(!find.FindFile(save_path))
+	{
+		Sleep(1000);
+	}
 	return true;
 }
 
@@ -86,6 +91,11 @@ bool CFormat::YUV2Video(CString save_path,CString src_path)
 	file.WriteString(command_bat);
 	file.Close();
 	WinExec("RUN_yuv_to_mpg.bat",SW_HIDE); //调用批处理文件
+	CFileFind find;
+	while(!find.FindFile(save_path))
+	{
+		Sleep(1000);
+	}
 	return true;
 }
 

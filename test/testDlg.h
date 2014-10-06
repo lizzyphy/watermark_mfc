@@ -58,5 +58,6 @@ private:
 	bool Finallydel(CString);
 	CString chartoCS(char*);      //char*类型转换为CString类型
 	int Readframe(char*);
+	void Show_now();
 };
  

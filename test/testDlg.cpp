@@ -22,9 +22,6 @@ using namespace std;
 
 // CtestDlg 对话框
 
-
-
-
 CtestDlg::CtestDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CtestDlg::IDD, pParent)
 	, m_Watermark(_T(""))
@@ -163,7 +160,6 @@ void CtestDlg::OnBnClickedOk()
 	UpdateData(true);
 	CString m_Src_en;
 	CString m_Path_en;
-	// TODO: 执行嵌入的必要操作
 
 	// 判断水印是否合法
 	
@@ -182,6 +178,7 @@ void CtestDlg::OnBnClickedOk()
 	m_Screen += _T("待嵌入视频格式检测完成…\r\n");
 	m_Progress.SetPos(1);
 	UpdateData(false);
+	Show_now();
 	if (!JudgeFormat(m_SavePath))
 	{
 		AfxMessageBox(_T("视频保存格式不合法"));
@@ -200,12 +197,8 @@ void CtestDlg::OnBnClickedOk()
 	m_Progress.SetPos(2);
 	UpdateData(false);
 	// 执行嵌入，若不成功则删除残留文件
-	MSG msg; 
-	while(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) 
-	{ 
-		TranslateMessage(&msg); 
-		DispatchMessage(&msg);
-	}
+	Show_now();
+	
 	Format.m_Src = m_Src;
 	Format.m_SavePath = m_SavePath;
 /*	m_Screen += _T("执行音频分离…\r\n");
@@ -235,7 +228,6 @@ void CtestDlg::OnBnClickedOk()
 	{
 		m_Src_en = m_Src;
 	}
-//	AfxMessageBox(m_Src_en);
 	
 	if(IfNeedChangeFormat(m_SavePath))//判断嵌水印文件是否需要转换格式
 	{
@@ -246,10 +238,10 @@ void CtestDlg::OnBnClickedOk()
 	{
 		m_Path_en = m_SavePath;
 	}
-//	AfxMessageBox(m_Path_en);
 	m_Screen += _T("执行嵌入…\r\n");
 	m_Progress.SetPos(3);
 	UpdateData(false);
+	Show_now();
 	//将水印从16进制转为2进制
 	CString watermark_en2;
 	CS16toCS2(m_Watermark_en,watermark_en2);
@@ -263,7 +255,6 @@ void CtestDlg::OnBnClickedOk()
 	fp = fopen("watermark.dat","wb");
 	fwrite(watermark, 4, 96, fp);
 	fclose(fp);
-	Sleep(1000);
 	//将打开、保存地址从CString转为char
 	char* srcpath = CStochar(m_Src_en);
 	int frame = Readframe(srcpath);
@@ -288,7 +279,6 @@ void CtestDlg::OnBnClickedOk()
 				Finallydel(m_Path);
 			}
 	}
-	Sleep(1000);
 /*	m_Screen += _T("执行音频合成…\r\n");
 	UpdateData(false);
 	if (!Format.AudioCombine())
@@ -550,5 +540,17 @@ int CtestDlg::Readframe(char* srcpath)
 	int size = info.st_size;
 	int frame = size/(720*576*1.5);
 	return frame;
+}
+
+/* 实时显示   */                             
+
+void CtestDlg::Show_now()
+{
+	MSG msg; 
+	while(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) 
+	{ 
+		TranslateMessage(&msg); 
+		DispatchMessage(&msg);
+	}
 }
 	

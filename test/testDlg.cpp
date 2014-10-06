@@ -12,6 +12,7 @@
 #include <io.h>
 #include <sys/stat.h>
 #include <afx.h>
+#include <afxinet.h>
 using namespace std; 
 
 

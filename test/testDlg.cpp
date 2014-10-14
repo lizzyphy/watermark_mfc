@@ -212,7 +212,6 @@ void CtestDlg::OnBnClickedOk()
 	}
 */
 	if(IfNeedChangeFormat(m_Src))
-	if(IfNeedChangeFormat(m_Src))
 	{
 		m_Screen += _T("执行视频格式转换…\r\n");
 		UpdateData(false);
@@ -435,40 +434,6 @@ void CtestDlg::Reverse(CString output)//解码部分
 	delete[] buff;
 	buff = NULL;
 }
-
-/*bool CtestDlg::WatermarkCheck(CString cmdStr, CString output)
-{
-	// TODO: 检验水印是否合法（可能要联网判断水印是否已经存在或码距太小），不合法的尽量通过变换，变换成合法的，实在不行返回错误；合法则保存入服务器数据库中
-	CString m_dif;
-	CArray <CString,CString&> m_Array,m_Array2;
-	m_Array.SetSize(50);
-	m_Array2.SetSize(50);
-	CDatabase db;
-	db.Open(NULL,FALSE,FALSE,L"ODBC;DSN=mysql5.6;UID=root;PWD=");
-	CRecordset rs( &db );
-	rs.Open( CRecordset::forwardOnly, (L"%s", cmdStr));
-	//short nFields = rs.GetODBCFieldCount();
-	int i=0;
-	while(!rs.IsEOF())
-	{
-
-		CString WMData, WMData2;
-		rs.GetFieldValue(L"WMData", WMData); 
-		rs.GetFieldValue(L"WMData2", WMData2);
-		m_Array.SetAtGrow(i,WMData);
-		m_Array2.SetAtGrow(i,WMData2);
-		i++;
-		rs.MoveNext();
-	}
-	CString addstr;
-	addstr.Format(L"insert into watermark values('%d','%d','%d','%s','%s')", 8, 99, 399, output,output);
-	db.ExecuteSQL(addstr);
-	rs.Close();
-	db.Close();
-	//m_dif = m_Array[1]^output;
-	//AfxMessageBox(m_dif);
-	return true;
-}*/
 
 bool CtestDlg::DirectoryExist(CString Path)
 {

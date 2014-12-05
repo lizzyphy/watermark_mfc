@@ -5,6 +5,7 @@
 #pragma once
 #include "afxcmn.h"
 #include "Format.h"
+#include "afxwin.h"
 
 // CtestDlg 对话框
 class CtestDlg : public CDialogEx
@@ -35,13 +36,14 @@ public:
 	afx_msg void OnBnClickedOk(); // 执行嵌入按钮
 	afx_msg void OnBnClickedCancel(); // 中止或退出按钮
 	afx_msg void OnBnClickedButtonSave();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);  //设置控件背景透明
+	CBrush m_brush; 
 	CString m_Watermark; // 水印
 	CString m_Watermark_en;//水印编码
 	CString m_Src; // 原始视频路径
 	CString m_Screen; // 进程显示
 	CString m_SavePath; // 保存路径
 	CString m_Ext; // 打开视频文件的扩展名
-
 	CProgressCtrl m_Progress; // 进度条
 	CFormat Format;
 private:
@@ -60,5 +62,8 @@ private:
 	int Readframe(char*);
 	void Show_now();
 	CString HTTP_GET_DATA(CString);//利用HTTP协议联网判断水印是否合法
+public:
+	//afx_msg void OnEnChangeEditWm();
+	
 };
  
